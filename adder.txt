@@ -1,0 +1,551 @@
+Copy the rcfiles directory to name_usn
+2. Copy the Verilog module lab1.v to rtl directory in rcfiles
+3. Open terminal changes the directory to /home/cadence/DATABASE/ name_usn
+4. Invoke the tool for synthesis by typing the command the following command
+➢ genus –legacy_ui
+➢ legacy_genus:/>
+read_hdl /home/cadence/DATABASE/name_usn/rcfiles/rtl/alu_32bit_if.v
+➢ legacy_genus:/>
+set_attributelibrary/home/cadence/DATABASE/name_usn/rcfiles/lib/slow_vdd1v0_b
+asicCells.lib
+➢ legacy_genus:/>
+set_attribute lib_search_path home/cadence/DATABASE/test1/rcfiles/rtl/
+➢ legacy_genus:/> elaborate alu_32bit_if (Module Name)
+➢ legacy_genus:/> synthesize -to_mapped (Synthesis without Constraints)
+➢ legacy_genus:/> report timing > alu_32bit_if_t1
+➢ legacy_genus:/> report area > alu_32bit_if_a1
+➢ legacy_genus:/> report power > alu_32bit_if _p1
+
+
+
+
+1. a. Write Verilog code for D-Latch, Synthesize the design.
+Source Code: Testbench code:
+module d_latch(q,d,en,rst);
+input d, en, rst;
+output q;
+reg q;
+ always@(d,en,rst)
+ begin
+ if(en==0)
+ q<=0;
+ else
+ begin
+ if(rst==1)
+ q<=0;
+ else
+ q<=d;
+ end
+ end
+endmodule
+
+module d_latch_tb;
+reg d,en,rst;
+wire q;
+d_latch dl1(q,d,en,rst);
+initial
+begin
+d=0;en=0;rst=0;
+#10 rst=1;d=1;en=1;
+#10 rst=0;en=1;d=1;
+#10 rst=0;en=1;d=0;
+#10 rst=0;en=0;d=1;
+end
+initial
+#100 $finish;
+endmodule
+ assign qb_o =~ q_o;
+endmodule
+
+1. b. Write Verilog code for SR-Latch, Synthesize the design.
+Source Code Testbench code
+module sr_latch(en,reset,s_i,r_i,q_o,qb_o);
+input en, reset, s_i, r_i;
+output q_o,qb_o;
+reg q_o;
+ always@ (s_i or r_i or reset or en)
+ begin
+ if (en==0 )
+ q_o <=0;
+ else if(reset==1)
+ q_o<=0;
+ else
+ begin
+ if(s_i ==0 & r_i==0)
+ q_o<=q_o;
+ if(s_i ==0 & r_i==1)
+ q_o<=1'b0;
+ if(s_i ==1 & r_i==0)
+ q_o<=1'b1;
+ if(s_i ==1 & r_i==1)
+ q_o<=1'bx;
+ end
+ end
+
+
+module srlatch_test();
+reg en,reset,s_i,r_i;
+wire q_o,qb_o;
+sr_latch srlatch1 (en,reset,s_i,r_i,q_o,qb_o);
+ initial
+ begin
+ reset = 1'b0;
+ en=1'b1;
+ s_i= 1'b0;r_i =1'b0;
+ #10 s_i=1'b1;r_i =1'b1;
+ #10 s_i =1'b1;r_i =1'b0;
+ #10 reset =1'b1;s_i = 1'b0;r_i =1'b0;
+ #10 s_i =1'b0; r_i =1'b1;
+ #10 s_i =1'b1; r_i =1'b0;
+ #10 s_i =1'b0; r_i =1'b0;
+ #10 s_i = 1'b1; r_i=1'b1;
+ end
+ initial
+ #100 $finish;
+endmodule
+
+DEPARTMENT OF ECE, BNMIT 60
+VLSI LAB MANUAL [18ECL77]
+
+1. c. Write Verilog code for JK-Latch, Synthesize the design.
+Source Code Testbench code
+module
+jk_latch(en,reset,j_i,k_i,q_o,qb_o);
+ input en,reset,j_i,k_i;
+ output q_o,qb_o;
+ reg q_o;
+ always@ (j_i or k_i or reset or en)
+ begin
+ if (reset==1)
+ q_o <=0;
+ else if(en==0)
+ q_o<=0;
+ else
+ begin
+ if (j_i ==0 & k_i==0)
+ q_o<=q_o;
+ if (j_i ==0 & k_i==1)
+ q_o<=1'b0;
+ if (j_i ==1 & k_i==0)
+ q_o<=1'b1;
+ if (j_i ==1 & k_i==1)
+ q_o<=~q_o;
+ end
+ end
+ assign qb_o =~ q_o;
+endmodule
+module jklatch_test();
+ reg en,reset,j_i,k_i;
+ wire q_o,qb_o;
+ jk_latch
+jklatch1(en,reset,j_i,k_i,q_o,qb_o);
+ initial
+ begin
+ reset = 1'b0;j_i = 1'b0;k_i =1'b0;
+ en=1'b1;
+ #10 j_i =1'b1;k_i =1'b1;
+ #10 j_i =1'b1;k_i =1'b0;
+ #10 j_i = 1'b0;k_i =1'b0;
+ #10 j_i =1'b0; k_i =1'b1;
+ #10 j_i =1'b1; k_i =1'b0;
+ #10 j_i =1'b0; k_i =1'b0;
+ #10 j_i = 1'b1; k_i =1'b1;
+ end
+ initial
+#100 $finish;
+endmodule
+
+
+1. d. Write Verilog code for D-Flip Flop, Synthesize the design.
+Source Code Testbench code
+module d_ff(clk,reset,din,q,qb);
+ input clk,reset,din;
+ output q,qb;
+ reg q;
+ always@ (posedge clk or negedge reset)
+ begin
+ if(~reset)
+ q<=0;
+ else
+ q<=din;
+ end
+ assign qb=~q;
+endmodule
+
+Testbench:
+module dff_tb();
+ reg reset,clk,din;
+ wire q,qb;
+ d_ff d1(clk,reset,din,q,qb);
+ initial
+ begin
+ clk<=1'b0;
+ end
+ always
+ begin
+ #5 clk<=~clk;
+ end
+ initial
+ begin
+ reset=1'b0;
+ din=1'b0;
+ #10 din=1'b1;
+ #10 reset=1'b1; din=1'b0;
+ #10 din=1'b1;
+ end
+ initial
+ #100 $finish;
+endmodule
+
+
+1. e. Write Verilog code for SR Flip Flop, Synthesize the design.
+Source Code Testbench code
+module sr_ff(clk,reset,s_i,r_i,q_o,qb_o);
+ input clk,reset,s_i,r_i;
+ output q_o,qb_o;
+ reg q_o;
+ always@ (posedge clk or negedge reset)
+ begin
+ if(reset==0)
+ q_o<=0;
+ else
+ begin
+ if (s_i ==0 & r_i==0)
+ q_o<=q_o;
+ if (s_i ==0 & r_i==1)
+ q_o<=1'b0;
+ if (s_i ==1 & r_i==0)
+ q_o<=1'b1;
+ if (s_i ==1 & r_i==1)
+ q_o<=1'bx;
+ end
+ end
+ assign qb_o=~q_o;
+endmodule
+
+
+module srff_test();
+ reg clk,reset,s_i,r_i;
+ wire q_o,qb_o;
+ sr_ff srff1(clk,reset,s_i,r_i,q_o,qb_o);
+ initial
+ begin
+ clk<=1'b0;
+ end
+ always
+ begin
+ #5 clk<=~clk;
+ end
+ initial
+ begin
+ reset=1'b0;s_i=1'b0;r_i=1'b0;
+ #10 s_i=1'b1;r_i=1'b1;
+ #10 s_i=1'b1;r_i=1'b0;
+ #10 reset =1'b1;s_i=1'b0;r_i=1'b0;
+ #10 s_i=1'b0;r_i=1'b1;
+ #10 s_i=1'b1;r_i=1'b0;
+ #10 s_i=1'b0;r_i=1'b0;
+ #10 s_i=1'b1;r_i=1'b1;
+ end
+ initial
+ #100 $finish;
+endmodule
+
+
+1. f. Write Verilog code for JK Flip Flop, Synthesize the design
+Source Code Testbench code
+module
+jk_ff(clk,reset,j_i,k_i,q_o,qb_o);
+ input clk,reset,j_i,k_i;
+ output q_o,qb_o;
+ reg q_o;
+ always@ (posedge clk or negedge
+reset)
+ begin
+ if (reset==0)
+ q_o<=0;
+ else
+ begin
+ if(j_i ==0 & k_i==0)
+ q_o<=q_o;
+ if(j_i ==0 & k_i==1)
+ q_o<=1'b0;
+ if(j_i ==1 & k_i==0)
+ q_o<=1'b1;
+ if(j_i ==1 & k_i==1)
+ q_o<=~q_o;
+ end
+ end
+ assign qb_o=~q_o;
+endmodule
+
+
+module jkff_test();
+ reg clk,reset,j_i,k_i;
+ wire q_o,qb_o;
+ jk_ff
+jkff1(clk,reset,j_i,k_i,q_o,qb_o);
+ initial
+ begin
+ clk<=1'b0;
+ end
+ always
+ begin
+ #5 clk<=~clk;
+ end
+ initial
+ begin
+ reset=1'b0;j_i=1'b0;k_i=1'b0;
+ #10 j_i=1'b1;k_i=1'b1;
+ #10 j_i=1'b1;k_i=1'b0;
+ #10 reset=1'b1;j_i=1'b0;k_i=1'b0;
+ #10 j_i=1'b0;k_i=1'b1;
+ #10 j_i=1'b1;k_i=1'b0;
+ #10 j_i=1'b0;k_i=1'b0;
+ #10 j_i=1'b1;k_i=1'b1;
+ end
+ initial
+ #100 $finish;
+endmodule
+
+==
+module updowncount(input dir,input
+reset,input clk,output [3:0]q);
+ reg [3:0]q;
+ always@(posedge clk or negedge
+reset)
+ begin
+ if(!reset)
+ q<=4'b0000;
+ else
+ begin
+ if(dir)
+ begin
+ q<=q+1;
+ if(q==4'b1001)
+ q<=4'b0000;
+ end
+ else
+ begin
+ q<=4'b1001;
+ q<=q-1;
+ if(q==4'b0000);
+ end
+ end
+ end
+endmodule
+
+==
+module bcd_tb();
+ reg reset,clk,dir;
+ wire [3:0] q;
+ bcdsynch_updowncounter
+d1(dir,reset,clk,q);
+ initial
+ begin
+ reset=0;
+ dir=0;
+ clk=0;
+ end
+ always
+ #5 clk=~clk;
+ initial
+ begin
+ #40 reset=1'b1;
+ #195 reset=1'b0;
+ #20 reset=1'b1;
+ #100 dir=1'b1;
+ #40 reset=1'b1;
+ #195 reset=1'b0;
+ #20 reset=1'b1;
+ end
+ initial
+ begin
+ #800 $finish;
+ end
+ initial
+ #500 $finish;
+endmodule
+
+legacy_genus:/> read_hdl
+/home/cadence/DATABASE/name_usn/rcfiles/rtl/updowncounter.v
+legacy_genus:/> set_attribute library
+/home/cadence/DATABASE/name_usn/rcfiles/lib/slow_vdd1v0_basicCells.lib
+legacy_genus:/> set_attribute lib_search_path
+/home/cadence/DATABASE/name_usn/rcfiles/rtl/
+
+legacy_genus:/> elaborate updowncounter
+legacy_genus:/> synthesize -to_mapped
+legacy_genus:/> report timing > updownCt1
+legacy_genus:/> report area > updownCa1
+legacy_genus:/> report power > updownCp1
+legacy_genus:/> synthesize -to_mapped -effort medium
+
+legacy_genus:/> report timing > updownCtm
+legacy_genus:/> report area > updownCam
+legacy_genus:/> report power > updownCpm
+legacy_genus:/> write_sdf > Updowncsdf1
+legacy_genus:/> write_sdc > updowncsdc 
+
+
+
+==
+
+module cla(in1, in2, s, cy, ac, clk);
+reg[7:0]p,g,c;
+input [7:0]in1, in2;
+output[7:0]s;
+output cy, ac;
+integer i;
+input clk;
+always@(posedge clk)
+begin
+c[0]=0;
+p=in1^in2;
+g=in1&in2;
+for(i=7;i>0;i=i-1)
+c[i]=g[i-1]|(p[i-1]&c[i-1]);
+end
+assign s=p^c;
+assign cy=c[7];
+assign ac=c[4];
+endmodule
+
+==
+module cla8bit_tb;
+reg[7:0]in1,in2;
+reg clk;
+wire[7:0]s;
+wire cy,ac;
+cla8bit cla1(in1, in2, s,cy,ac,clk);
+initial
+begin
+in1=8'd0;
+in2=8'd0;
+clk=1'b0;
+end
+always #5 clk=~clk;
+initial
+begin
+#10 in1=8'd10;
+#10 in2=8'd99;
+#10 in1 =8'd55;
+#10 in2=8'd09;
+#10 in1=8'd99;
+#10 in2=8'd99;
+end
+endmodule
+=====
+module alu_32bit_case(y,a,b,f);
+input [31:0]a;
+input [31:0]b;
+input [2:0]f;
+output reg [31:0]y;
+always@(*)
+begin
+case(f)
+3'b000:y=a&b; //AND
+Operation
+3'b001:y=a|b; //OR
+3'b010:y=~(a&b); //NAND
+Operation
+3'b011:y=~(a|b); //NOR
+Operation
+3'b010:y=a+b; //Addition
+3'b011:y=a-b; //Subtraction
+3'b100:y=a*b; //Multiply
+default:y=32'bx;
+endcase
+end
+endmodule
+
+
+module alu_32bit_tb_case;
+reg [31:0]a;
+reg [31:0]b;
+reg [2:0]f;
+wire [31:0]y;
+alu_32bit_case
+test2(.y(y),.a(a),.b(b),.f(f));
+initial
+begin
+a=32'h00000000;
+b=32'hFFFFFFFF;
+#10 f=3'b000;
+#10 f=3'b001;
+#10 f=3'b010;
+ #10 f=3'b100;
+end
+initial
+#50 $finish;
+ initial
+ begin
+ $dumpfile("alu_case.vcd");
+ $dumpvars(2,
+alu_32bit_tb_case);
+ end
+endmodule
+
+===
+module
+alu_32bit_if(y,clk,reset,a,b,f);
+input [31:0]a;
+input [31:0]b;
+
+input [2:0]f;
+ input clk, reset;
+output reg [31:0]y;
+ always@(posedge clk, negedge
+reset)
+begin
+ if (!reset)
+ y= 0; else
+if(f==3'b000)
+y=a&b; //AND Operation
+else if (f==3'b001)
+y=a|b; //OR Operation
+else if (f==3'b010)
+y=a+b; //Addition
+else if (f==3'b011)
+y=a-b; //Subtraction
+else if (f==3'b100)
+y=a*b; //Multiply
+else
+y=32'bx;
+end
+endmodule
+ reg clk, reset;
+
+==
+module alu_32bit_tb_if;
+reg [31:0]a;
+reg [31:0]b;
+reg [2:0]f;
+wire [31:0]y;
+ alu_32bit_if test2(.y(y),.clk(clk),
+.reset(reset),.a(a),.b(b),.f(f));
+ initial begin clk = 1'b0;reset =
+1'b1; end
+ always #5 clk = ~clk;
+initial
+begin
+a=32'h00000000;
+b=32'hFFFFFFFF;
+
+#10 f=3'b000;
+#10 f=3'b001;
+ #10 reset =1'b0;
+ #10 f=3'b000;
+#10 f=3'b001;
+#10 f=3'b010;
+ #10 f=3'b100;
+end
+initial
+#50 $finish;
+ initial
+ begin
+ $dumpfile("alu_case.vcd");
+ $dumpvars(2,
+alu_32bit_tb_if);
+ end
+endmodule
